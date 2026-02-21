@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloxium — The Ultimate Roblox Bootstrapper</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --bg: #05050a;
+  --bg2: #0c0c14;
+  --bg3: #12121e;
+  --border: #1a1a2e;
+  --border2: #252540;
+  --text: #eeeeff;
+  --text2: #8888bb;
+  --text3: #444466;
+  --accent: #7c5cff;
+  --accent2: #b09aff;
+  --accent3: #d4c8ff;
+  --pink: #ff5ca8;
+  --pink2: #ff8ac4;
+  --glow: rgba(124,92,255,0.25);
+  --pglow: rgba(255,92,168,0.20);
+  --font: 'Syne', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CUSTOM CURSOR ── */
+#cursor {
+  position: fixed; top: 0; left: 0; z-index: 99999;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.cur-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent2);
+  position: absolute; transform: translate(-50%,-50%);
+  transition: transform .1s;
+  box-shadow: 0 0 10px var(--accent);
+}
+.cur-ring {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid rgba(176,154,255,0.4);
+  position: absolute; transform: translate(-50%,-50%);
+  transition: all .18s cubic-bezier(0.2,0.8,0.2,1);
+}
+
+/* ── NOISE OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 1;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ── CANVAS BG ── */
+#starfield { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* ── ANIME GIRL ── */
+#anime-girl {
+  position: fixed;
+  right: -20px; bottom: 0;
+  width: 520px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  animation: girlIn 1.4s 0.8s cubic-bezier(0.2,0.8,0.2,1) forwards;
+  filter: drop-shadow(-20px 0 60px rgba(124,92,255,0.3));
+}
+@keyframes girlIn {
+  from { opacity: 0; transform: translateY(30px) translateX(30px); }
+  to   { opacity: 1; transform: translateY(0) translateX(0); }
+}
+/* Floating idle */
+#anime-girl svg { animation: girlFloat 5s ease-in-out infinite; }
+@keyframes girlFloat {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+/* Gradient fade at bottom so she blends in */
+#anime-girl::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 140px;
+  background: linear-gradient(to top, var(--bg), transparent);
+  pointer-events: none;
+}
+
+/* ── EVERYTHING IS ABOVE BG ── */
+header, main, footer, section, nav { position: relative; z-index: 3; }
+
+/* ── NAVBAR ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+  background: linear-gradient(to bottom, rgba(5,5,10,0.95), transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 18px; font-weight: 800; letter-spacing: -0.04em;
+  text-decoration: none; color: var(--text);
+}
+.nav-logo-mark {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; color: #fff;
+  box-shadow: 0 0 16px var(--glow);
+}
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-links a {
+  color: var(--text2); text-decoration: none; font-size: 14px; font-weight: 600;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-dl {
+  background: var(--accent); color: #fff; border: none;
+  padding: 9px 20px; border-radius: 8px; font-family: var(--font);
+  font-size: 13.5px; font-weight: 700; cursor: none;
+  transition: all .2s; text-decoration: none;
+  box-shadow: 0 4px 20px var(--glow);
+  display: flex; align-items: center; gap: 7px;
+}
+.nav-dl:hover { filter: brightness(1.15); transform: translateY(-1px); box-shadow: 0 8px 30px var(--glow); }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  padding: 120px 80px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 12px; font-family: var(--mono); font-weight: 500;
+  color: var(--accent2); letter-spacing: 0.12em; text-transform: uppercase;
+  background: rgba(124,92,255,0.1); border: 1px solid rgba(124,92,255,0.25);
+  padding: 6px 14px; border-radius: 100px; margin-bottom: 28px;
+  animation: fadeUp .8s .1s both;
+}
+.hero-eyebrow span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+
+.hero-title {
+  font-size: clamp(52px, 7vw, 88px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  margin-bottom: 24px;
+  max-width: 680px;
+  animation: fadeUp .8s .2s both;
+}
+.hero-title .grad {
+  background: linear-gradient(135deg, var(--accent2) 0%, var(--pink2) 60%, #ffaa60 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-sub {
+  font-size: 18px; color: var(--text2); max-width: 480px; line-height: 1.65;
+  margin-bottom: 40px; font-weight: 400;
+  animation: fadeUp .8s .3s both;
+}
+.hero-actions {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  animation: fadeUp .8s .4s both;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  color: #fff; border: none; padding: 15px 30px;
+  border-radius: 12px; font-family: var(--font);
+  font-size: 15px; font-weight: 800; cursor: none;
+  transition: all .25s; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 9px;
+  box-shadow: 0 8px 40px rgba(124,92,255,0.35), 0 8px 40px rgba(255,92,168,0.15);
+  position: relative; overflow: hidden;
+  letter-spacing: -0.01em;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+}
+.btn-primary:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 50px rgba(124,92,255,0.45), 0 16px 50px rgba(255,92,168,0.25); }
+.btn-secondary {
+  background: var(--bg3); color: var(--text);
+  border: 1px solid var(--border2);
+  padding: 15px 26px; border-radius: 12px; font-family: var(--font);
+  font-size: 15px; font-weight: 700; cursor: none;
+  transition: all .2s; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-secondary:hover { background: var(--border); border-color: var(--text3); transform: translateY(-2px); }
+.btn-discord {
+  background: #5865F2; color: #fff;
+  border: none; padding: 15px 26px;
+  border-radius: 12px; font-family: var(--font);
+  font-size: 15px; font-weight: 700; cursor: none;
+  transition: all .2s; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 4px 20px rgba(88,101,242,0.3);
+}
+.btn-discord:hover { background: #4752c4; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(88,101,242,0.4); }
+
+.hero-stats {
+  display: flex; align-items: center; gap: 32px; margin-top: 52px;
+  animation: fadeUp .8s .5s both;
+}
+.hero-stat { text-align: left; }
+.hs-val { font-size: 26px; font-weight: 800; letter-spacing: -0.04em; color: var(--accent2); }
+.hs-lbl { font-size: 12px; color: var(--text2); font-family: var(--mono); margin-top: 2px; }
+.hs-div { width: 1px; height: 36px; background: var(--border2); }
+
+/* Scroll indicator */
+.scroll-hint {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--text3); font-size: 11px; font-family: var(--mono);
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0);} 50%{transform:translateX(-50%) translateY(6px);} }
+
+/* ── GLOW ORBS ── */
+.orb {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  filter: blur(80px);
+}
+.orb-1 { width:500px; height:500px; background:rgba(124,92,255,0.12); top:-100px; left:-100px; }
+.orb-2 { width:400px; height:400px; background:rgba(255,92,168,0.08); top:100px; right:200px; }
+.orb-3 { width:300px; height:300px; background:rgba(124,92,255,0.08); bottom:0; left:300px; }
+
+/* ── SECTION BASE ── */
+section { padding: 100px 80px; }
+.section-label {
+  font-size: 11px; font-family: var(--mono); letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent2); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-label::before { content:''; width:20px; height:1px; background:var(--accent); }
+.section-title {
+  font-size: clamp(36px, 4vw, 56px); font-weight: 800; letter-spacing: -0.04em;
+  line-height: 1.05; margin-bottom: 16px;
+}
+.section-sub { font-size: 16px; color: var(--text2); line-height: 1.65; max-width: 540px; }
+
+/* ── FEATURES ── */
+#features { background: var(--bg); border-top: 1px solid var(--border); }
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 60px;
+}
+.feat-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px;
+  transition: all .25s cubic-bezier(0.2,0.8,0.2,1);
+  position: relative; overflow: hidden;
+}
+.feat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0; transition: opacity .3s;
+}
+.feat-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+.feat-card:hover::before { opacity: 1; }
+.feat-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: rgba(124,92,255,0.12); border: 1px solid rgba(124,92,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 18px;
+  box-shadow: 0 0 20px rgba(124,92,255,0.1);
+}
+.feat-card.pink .feat-icon { background: rgba(255,92,168,0.1); border-color: rgba(255,92,168,0.2); box-shadow: 0 0 20px rgba(255,92,168,0.1); }
+.feat-card.pink:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px rgba(255,92,168,0.05); }
+.feat-title { font-size: 17px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+.feat-desc { font-size: 13.5px; color: var(--text2); line-height: 1.65; }
+.feat-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; font-family: var(--mono);
+  background: rgba(124,92,255,0.12); color: var(--accent2);
+  border: 1px solid rgba(124,92,255,0.2);
+  padding: 3px 8px; border-radius: 5px; margin-top: 14px;
+}
+
+/* ── STORY ── */
+#story {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%);
+  border-top: 1px solid var(--border);
+}
+.story-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.story-quote {
+  font-size: 28px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.35;
+  color: var(--text); margin-bottom: 24px;
+}
+.story-quote .hl { color: var(--accent2); }
+.story-body { font-size: 14px; color: var(--text2); line-height: 1.8; }
+.story-body p { margin-bottom: 14px; }
+.story-body p:last-child { margin-bottom: 0; }
+.story-timeline {
+  display: flex; flex-direction: column; gap: 0;
+}
+.tl-item {
+  display: flex; gap: 20px; padding-bottom: 28px;
+  position: relative;
+}
+.tl-item:last-child { padding-bottom: 0; }
+.tl-item::before {
+  content: '';
+  position: absolute; left: 15px; top: 32px; bottom: 0; width: 1px;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+}
+.tl-item:last-child::before { display: none; }
+.tl-dot {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(124,92,255,0.15); border: 1px solid rgba(124,92,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--accent2);
+}
+.tl-content {}
+.tl-year { font-size: 11px; font-family: var(--mono); color: var(--text3); margin-bottom: 4px; }
+.tl-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.tl-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ── DOWNLOAD ── */
+#download {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.dl-orb-1 { position: absolute; width: 600px; height: 600px; border-radius: 50%; background: rgba(124,92,255,0.08); left: 50%; top: 50%; transform: translate(-50%,-50%); filter: blur(100px); pointer-events:none; }
+.dl-orb-2 { position: absolute; width: 300px; height: 300px; border-radius: 50%; background: rgba(255,92,168,0.06); left: 30%; top: 40%; filter: blur(80px); pointer-events:none; }
+#download .section-label { justify-content: center; }
+#download .section-label::before { display: none; }
+.dl-card {
+  display: inline-flex; flex-direction: column; align-items: center; gap: 28px;
+  background: var(--bg2); border: 1px solid var(--border2);
+  border-radius: 24px; padding: 48px 60px; margin-top: 48px;
+  position: relative; max-width: 520px;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+}
+.dl-card::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 200px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+}
+.dl-icon {
+  width: 72px; height: 72px; border-radius: 20px;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; font-weight: 900; color: #fff;
+  box-shadow: 0 12px 40px var(--glow), 0 12px 40px var(--pglow);
+}
+.dl-title { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
+.dl-meta { font-size: 13px; color: var(--text2); font-family: var(--mono); }
+.dl-specs {
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+.dl-spec {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text2); font-family: var(--mono);
+  background: var(--bg3); border: 1px solid var(--border); padding: 5px 12px; border-radius: 8px;
+}
+.dl-spec i { color: var(--accent2); font-size: 11px; }
+
+/* ── CREDITS ── */
+#credits {
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+.credits-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px;
+}
+.credit-card {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px;
+  transition: all .2s;
+}
+.credit-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.credit-avatar {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 14px;
+  box-shadow: 0 4px 16px var(--glow);
+}
+.credit-avatar.pink { background: linear-gradient(135deg, var(--pink), #ff8c42); box-shadow: 0 4px 16px var(--pglow); }
+.credit-avatar.teal { background: linear-gradient(135deg, #00d4c8, #0090ff); box-shadow: 0 4px 16px rgba(0,212,200,0.2); }
+.credit-name { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 3px; }
+.credit-role { font-size: 12px; color: var(--accent2); font-family: var(--mono); margin-bottom: 10px; }
+.credit-bio { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ── DISCORD SECTION ── */
+#community {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.discord-card {
+  display: inline-flex; align-items: center; gap: 28px;
+  background: linear-gradient(135deg, rgba(88,101,242,0.12), rgba(88,101,242,0.04));
+  border: 1px solid rgba(88,101,242,0.3);
+  border-radius: 20px; padding: 36px 48px; margin-top: 40px;
+}
+.discord-icon { font-size: 52px; color: #5865F2; filter: drop-shadow(0 0 20px rgba(88,101,242,0.4)); }
+.discord-info { text-align: left; }
+.discord-info h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 6px; }
+.discord-info p { font-size: 14px; color: var(--text2); margin-bottom: 18px; max-width: 340px; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--bg2); border-top: 1px solid var(--border);
+  padding: 48px 80px; position: relative;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-logo { display: flex; align-items: center; gap: 10px; }
+.footer-logo span { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { color: var(--text2); text-decoration: none; font-size: 13px; transition: color .2s; }
+.footer-links a:hover { color: var(--text); }
+.footer-right { font-size: 12px; font-family: var(--mono); color: var(--text3); text-align: right; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity .7s cubic-bezier(0.2,0.8,0.2,1), transform .7s cubic-bezier(0.2,0.8,0.2,1);
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Version pill */
+.version-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-family: var(--mono);
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border2);
+  color: var(--text2); padding: 5px 12px; border-radius: 100px;
+  margin-left: 12px;
+}
+.version-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 5px var(--accent); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* MUSIC PLAYER */
+#music-player {
+  position: fixed; bottom: 24px; left: 24px; z-index: 500;
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(12,12,20,0.88);
+  border: 1px solid var(--border2);
+  border-radius: 100px;
+  padding: 10px 18px 10px 12px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+  transition: all .3s cubic-bezier(0.2,0.8,0.2,1);
+  cursor: none; user-select: none;
+}
+#music-player:hover { border-color: rgba(124,92,255,0.5); box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 20px var(--glow); }
+.mp-art {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--pink));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+  animation: mpSpin 4s linear infinite paused;
+  box-shadow: 0 0 12px var(--glow);
+}
+.mp-art.playing { animation-play-state: running; }
+@keyframes mpSpin { to { transform: rotate(360deg); } }
+.mp-title { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+.mp-artist { font-size: 10.5px; color: var(--text2); font-family: var(--mono); }
+.mp-controls { display: flex; align-items: center; gap: 6px; }
+.mp-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: none;
+  background: var(--bg4); color: var(--text2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; cursor: none; transition: all .2s;
+}
+.mp-btn:hover { background: var(--accent); color: #fff; }
+.mp-btn.active { background: var(--accent); color: #fff; box-shadow: 0 0 10px var(--glow); }
+.mp-vol {
+  width: 56px; height: 3px; -webkit-appearance: none;
+  background: var(--border2); border-radius: 2px; outline: none; cursor: none;
+}
+.mp-vol::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent); cursor: none;
+}
+.mp-wave { display: flex; align-items: center; gap: 2px; height: 16px; }
+.mp-wave span {
+  width: 2px; border-radius: 2px; background: var(--accent);
+  animation: mpWave var(--d) var(--dd) ease-in-out infinite alternate; opacity: 0.6;
+}
+@keyframes mpWave { from { height: 3px; } to { height: 14px; } }
+.mp-wave.paused span { animation-play-state: paused; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  nav { padding: 0 24px; }
+  section, #hero { padding: 80px 24px; }
+  .features-grid, .credits-grid { grid-template-columns: 1fr; }
+  .story-inner { grid-template-columns: 1fr; gap: 40px; }
+  .hero-title { font-size: 48px; }
+  #anime-girl { width: 300px; opacity: 0.3; }
+  .discord-card { flex-direction: column; text-align: center; }
+  .discord-info { text-align: center; }
+  footer { flex-direction: column; gap: 24px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor">
+  <div class="cur-dot" id="cur-dot"></div>
+  <div class="cur-ring" id="cur-ring"></div>
+</div>
+
+<!-- Starfield -->
+<canvas id="starfield"></canvas>
+
+<!-- Anime girl (SVG drawn inline — stylized character) -->
+<div id="anime-girl">
+  <svg viewBox="0 0 400 700" xmlns="http://www.w3.org/2000/svg" width="400" height="700">
+    <defs>
+      <linearGradient id="hairGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#b09aff"/>
+        <stop offset="100%" stop-color="#7c5cff"/>
+      </linearGradient>
+      <linearGradient id="clothGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1a1430"/>
+        <stop offset="100%" stop-color="#0d0a1e"/>
+      </linearGradient>
+      <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fce4cc"/>
+        <stop offset="100%" stop-color="#f5c9a8"/>
+      </linearGradient>
+      <linearGradient id="accentGlow" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7c5cff" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#ff5ca8" stop-opacity="0.3"/>
+      </linearGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="softglow">
+        <feGaussianBlur stdDeviation="6" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <!-- Ambient glow behind character -->
+    <ellipse cx="200" cy="400" rx="180" ry="300" fill="url(#accentGlow)" opacity="0.15"/>
+
+    <!-- Skirt/lower body -->
+    <path d="M140 460 C120 480 110 540 115 620 C130 680 270 680 285 620 C290 540 280 480 260 460 Z" fill="url(#clothGrad)" stroke="#2a2050" stroke-width="1.5"/>
+    <!-- Skirt accent lines -->
+    <path d="M155 470 C148 510 144 560 148 610" fill="none" stroke="#7c5cff" stroke-width="1" stroke-opacity="0.4"/>
+    <path d="M245 470 C252 510 256 560 252 610" fill="none" stroke="#7c5cff" stroke-width="1" stroke-opacity="0.4"/>
+    <!-- Skirt hem glow -->
+    <path d="M115 620 C130 680 270 680 285 620" fill="none" stroke="#7c5cff" stroke-width="2" stroke-opacity="0.5" filter="url(#glow)"/>
+
+    <!-- Legs -->
+    <rect x="158" y="620" width="26" height="60" rx="10" fill="#fce4cc"/>
+    <rect x="218" y="620" width="26" height="60" rx="10" fill="#fce4cc"/>
+    <!-- Stockings -->
+    <rect x="158" y="650" width="26" height="32" rx="8" fill="#1a1430"/>
+    <rect x="218" y="650" width="26" height="32" rx="8" fill="#1a1430"/>
+    <!-- Shoes -->
+    <ellipse cx="171" cy="682" rx="16" ry="8" fill="#0d0a1e"/>
+    <ellipse cx="231" cy="682" rx="16" ry="8" fill="#0d0a1e"/>
+    <!-- Shoe buckles -->
+    <rect x="165" y="675" width="12" height="4" rx="2" fill="#7c5cff" filter="url(#glow)"/>
+    <rect x="225" y="675" width="12" height="4" rx="2" fill="#7c5cff" filter="url(#glow)"/>
+
+    <!-- Torso / jacket -->
+    <path d="M145 300 C135 330 130 390 140 460 L260 460 C270 390 265 330 255 300 Z" fill="url(#clothGrad)" stroke="#2a2050" stroke-width="1.5"/>
+    <!-- Jacket collar area -->
+    <path d="M170 300 L200 340 L230 300" fill="#12102a" stroke="#2a2050" stroke-width="1"/>
+    <!-- Jacket trim (purple glowing outline) -->
+    <path d="M145 300 C140 330 136 370 138 420" fill="none" stroke="#7c5cff" stroke-width="1.5" stroke-opacity="0.6" filter="url(#glow)"/>
+    <path d="M255 300 C260 330 264 370 262 420" fill="none" stroke="#7c5cff" stroke-width="1.5" stroke-opacity="0.6" filter="url(#glow)"/>
+    <!-- Logo on jacket -->
+    <rect x="188" y="360" width="24" height="24" rx="6" fill="#7c5cff" opacity="0.8" filter="url(#glow)"/>
+    <text x="200" y="377" text-anchor="middle" font-family="Arial" font-size="12" font-weight="900" fill="white">B</text>
+
+    <!-- Arms -->
+    <!-- Left arm (slightly out) -->
+    <path d="M145 310 C120 320 105 360 110 400 C113 415 125 420 132 410 C138 400 138 370 148 340 Z" fill="url(#skinGrad)"/>
+    <!-- Left sleeve -->
+    <path d="M145 310 C130 318 118 340 112 365 C120 342 138 325 148 340 Z" fill="#1a1430" stroke="#2a2050" stroke-width="1"/>
+    <!-- Left hand holding phone/something -->
+    <ellipse cx="112" cy="408" rx="12" ry="9" fill="url(#skinGrad)"/>
+
+    <!-- Right arm -->
+    <path d="M255 310 C280 320 295 360 290 400 C287 415 275 420 268 410 C262 400 262 370 252 340 Z" fill="url(#skinGrad)"/>
+    <!-- Right sleeve -->
+    <path d="M255 310 C270 318 282 340 288 365 C280 342 262 325 252 340 Z" fill="#1a1430" stroke="#2a2050" stroke-width="1"/>
+    <!-- Right hand -->
+    <ellipse cx="288" cy="408" rx="12" ry="9" fill="url(#skinGrad)"/>
+
+    <!-- Neck -->
+    <rect x="188" y="260" width="24" height="45" rx="8" fill="url(#skinGrad)"/>
+
+    <!-- Head -->
+    <ellipse cx="200" cy="220" rx="72" ry="78" fill="url(#skinGrad)"/>
+
+    <!-- Hair back layer -->
+    <path d="M128 200 C118 150 122 100 140 70 C160 40 200 30 200 30 C200 30 240 40 260 70 C278 100 282 150 272 200 C268 170 260 145 240 130 C220 115 200 112 200 112 C200 112 180 115 160 130 C140 145 132 170 128 200 Z" fill="url(#hairGrad)"/>
+    <!-- Long hair strands going down back -->
+    <path d="M130 210 C115 250 108 320 115 400 C118 380 122 310 135 280 C142 250 138 230 130 210 Z" fill="url(#hairGrad)" opacity="0.9"/>
+    <path d="M270 210 C285 250 292 320 285 400 C282 380 278 310 265 280 C258 250 262 230 270 210 Z" fill="url(#hairGrad)" opacity="0.9"/>
+    <!-- Extra strand -->
+    <path d="M135 220 C120 280 118 350 125 410" fill="none" stroke="#9070ff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+    <path d="M265 220 C280 280 282 350 275 410" fill="none" stroke="#9070ff" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
+
+    <!-- Bangs / front hair -->
+    <path d="M128 190 C128 150 135 115 155 95 C170 78 190 72 200 72 C210 72 230 78 245 95 C265 115 272 150 272 190 C262 175 250 162 236 158 C222 154 210 156 200 156 C190 156 178 154 164 158 C150 162 138 175 128 190 Z" fill="url(#hairGrad)"/>
+    <!-- Bang strands -->
+    <path d="M148 165 C140 180 138 200 142 215" fill="none" stroke="#c0a8ff" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <path d="M165 150 C158 168 157 190 160 208" fill="none" stroke="#c0a8ff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+    <path d="M252 165 C260 180 262 200 258 215" fill="none" stroke="#c0a8ff" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <path d="M235 150 C242 168 243 190 240 208" fill="none" stroke="#c0a8ff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+    <!-- Center bang -->
+    <path d="M195 150 C193 168 193 185 196 200" fill="none" stroke="#9878ff" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+
+    <!-- Face features -->
+    <!-- Eyes -->
+    <!-- Left eye -->
+    <ellipse cx="172" cy="218" rx="16" ry="13" fill="white"/>
+    <ellipse cx="172" cy="220" rx="11" ry="11" fill="#5030c0"/>
+    <ellipse cx="172" cy="220" rx="7" ry="7" fill="#7c5cff"/>
+    <ellipse cx="172" cy="220" rx="4" ry="4" fill="#1a0840"/>
+    <!-- Iris shine -->
+    <ellipse cx="167" cy="215" rx="3" ry="2" fill="white" opacity="0.9"/>
+    <ellipse cx="176" cy="222" rx="1.5" ry="1.5" fill="white" opacity="0.6"/>
+    <!-- Eye glint (anime sparkle) -->
+    <path d="M164 213 L166 210 L168 213 Z" fill="white" opacity="0.8"/>
+    <!-- Eyelashes top -->
+    <path d="M157 210 C162 207 172 206 187 210" fill="none" stroke="#1a0840" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Eyelashes bottom -->
+    <path d="M158 226 C163 229 172 230 186 226" fill="none" stroke="#1a0840" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+    <!-- Right eye -->
+    <ellipse cx="228" cy="218" rx="16" ry="13" fill="white"/>
+    <ellipse cx="228" cy="220" rx="11" ry="11" fill="#5030c0"/>
+    <ellipse cx="228" cy="220" rx="7" ry="7" fill="#7c5cff"/>
+    <ellipse cx="228" cy="220" rx="4" ry="4" fill="#1a0840"/>
+    <ellipse cx="223" cy="215" rx="3" ry="2" fill="white" opacity="0.9"/>
+    <ellipse cx="232" cy="222" rx="1.5" ry="1.5" fill="white" opacity="0.6"/>
+    <path d="M220 213 L222 210 L224 213 Z" fill="white" opacity="0.8"/>
+    <path d="M213 210 C218 207 228 206 243 210" fill="none" stroke="#1a0840" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M214 226 C219 229 228 230 242 226" fill="none" stroke="#1a0840" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+    <!-- Eyebrows -->
+    <path d="M157 204 C163 199 178 198 185 202" fill="none" stroke="#3d2080" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M215 202 C222 198 237 199 243 204" fill="none" stroke="#3d2080" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Nose (subtle) -->
+    <path d="M197 236 C199 240 203 240 203 236" fill="none" stroke="#e8b898" stroke-width="1.5" stroke-linecap="round"/>
+
+    <!-- Mouth (small smile) -->
+    <path d="M188 252 C193 258 207 258 212 252" fill="none" stroke="#d4826a" stroke-width="2" stroke-linecap="round"/>
+    <!-- Lip shine -->
+    <ellipse cx="200" cy="252" rx="5" ry="2" fill="#ff8a80" opacity="0.4"/>
+
+    <!-- Blush -->
+    <ellipse cx="162" cy="238" rx="14" ry="8" fill="#ff8a80" opacity="0.25"/>
+    <ellipse cx="238" cy="238" rx="14" ry="8" fill="#ff8a80" opacity="0.25"/>
+
+    <!-- Ear and earring -->
+    <ellipse cx="128" cy="222" rx="9" ry="12" fill="url(#skinGrad)"/>
+    <ellipse cx="272" cy="222" rx="9" ry="12" fill="url(#skinGrad)"/>
+    <!-- Star earrings -->
+    <text x="126" y="238" text-anchor="middle" font-size="10" fill="#7c5cff" filter="url(#glow)" font-family="Arial">★</text>
+    <text x="274" y="238" text-anchor="middle" font-size="10" fill="#7c5cff" filter="url(#glow)" font-family="Arial">★</text>
+
+    <!-- Hair accessories (star clips) -->
+    <text x="155" y="165" text-anchor="middle" font-size="14" fill="#ff5ca8" filter="url(#glow)" font-family="Arial">✦</text>
+    <text x="248" y="162" text-anchor="middle" font-size="12" fill="#b09aff" filter="url(#glow)" font-family="Arial">✦</text>
+
+    <!-- Floating sparkles around character -->
+    <text x="88" y="320" font-size="16" fill="#7c5cff" opacity="0.6" filter="url(#glow)" font-family="Arial">✦</text>
+    <text x="305" y="280" font-size="12" fill="#ff5ca8" opacity="0.5" filter="url(#glow)" font-family="Arial">✦</text>
+    <text x="75" y="420" font-size="10" fill="#b09aff" opacity="0.4" font-family="Arial">★</text>
+    <text x="318" y="380" font-size="18" fill="#7c5cff" opacity="0.3" font-family="Arial">✦</text>
+  </svg>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark"><img src="oldroblox.png" style="width:18px;height:18px;object-fit:contain;" onerror="this.outerHTML='B'"></div>
+    Bloxium
+    <span class="version-pill"><span class="dot"></span>v2.0.0</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#story">Story</a>
+    <a href="#credits">Credits</a>
+    <a href="#community">Discord</a>
+  </div>
+  <a href="#download" class="nav-dl">
+    <i class="fa-solid fa-download"></i> Download
+  </a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-eyebrow">
+    <span></span> The #1 Roblox Bootstrapper
+  </div>
+  <h1 class="hero-title">
+    Play Roblox<br>
+    <span class="grad">your way.</span>
+  </h1>
+  <p class="hero-sub">
+    Bloxium gives you full control over Roblox — FastFlags, FPS unlock, keyboard sounds, custom themes, and more. Built for players who want more.
+  </p>
+  <div class="hero-actions">
+    <a href="#download" class="btn-primary">
+      <i class="fa-solid fa-download"></i> Download Free
+    </a>
+    <a href="https://discord.gg/SGrhtuqbWp" class="btn-discord" target="_blank">
+      <i class="fa-brands fa-discord"></i> Discord
+    </a>
+    <a href="https://github.com" class="btn-secondary" target="_blank">
+      <i class="fa-brands fa-github"></i> GitHub
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hs-val" id="dl-count">...</div>
+      <div class="hs-lbl">Downloads</div>
+    </div>
+    <div class="hs-div"></div>
+    <div class="hero-stat">
+      <div class="hs-val">8</div>
+      <div class="hs-lbl">Keyboard Sounds</div>
+    </div>
+    <div class="hs-div"></div>
+    <div class="hero-stat">
+      <div class="hs-val">9</div>
+      <div class="hs-lbl">Themes</div>
+    </div>
+    <div class="hs-div"></div>
+    <div class="hero-stat">
+      <div class="hs-val">Free</div>
+      <div class="hs-lbl">Always & Forever</div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>scroll down</span>
+    <i class="fa-solid fa-chevron-down"></i>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">What's inside</div>
+  <h2 class="section-title reveal">Everything you need.<br>Nothing you don't.</h2>
+  <p class="section-sub reveal">Bloxium is lean, fast, and focused. No bloat, no nonsense — just the tools that actually matter.</p>
+
+  <div class="features-grid">
+    <div class="feat-card reveal">
+      <div class="feat-icon">🚩</div>
+      <div class="feat-title">FastFlags</div>
+      <div class="feat-desc">Full control over Roblox's engine. Toggle shadows, disable post-FX, strip textures, override renderer, and write raw JSON flags manually. Presets included.</div>
+      <div class="feat-badge"><i class="fa-solid fa-bolt"></i> Instant Apply</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">⌨️</div>
+      <div class="feat-title">Keyboard Sounds</div>
+      <div class="feat-desc">8 mechanical switch profiles synthesized in real-time via WebAudio. Cherry MX Red, Blue, Brown, Topre, Buckling Spring and more — through your headphones as you type.</div>
+      <div class="feat-badge"><i class="fa-solid fa-music"></i> WebAudio Synth</div>
+    </div>
+    <div class="feat-card pink reveal">
+      <div class="feat-icon">🎨</div>
+      <div class="feat-title">9 Themes</div>
+      <div class="feat-desc">Dark, Nebula, Carbon, Rose, Forest, Sunset, Ice, Gold, and Light. Plus a custom accent color picker and animated backgrounds — particles, nebula, neon grid, digital rain.</div>
+      <div class="feat-badge"><i class="fa-solid fa-palette"></i> Fully Animated</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">🖥️</div>
+      <div class="feat-title">FPS Unlock</div>
+      <div class="feat-desc">Remove Roblox's 60FPS cap and play at any framerate your hardware allows. Set a specific limit or go fully uncapped for maximum smoothness.</div>
+      <div class="feat-badge"><i class="fa-solid fa-gauge-high"></i> Uncapped</div>
+    </div>
+    <div class="feat-card pink reveal">
+      <div class="feat-icon">🧹</div>
+      <div class="feat-title">Texture Removal</div>
+      <div class="feat-desc">Remove all Roblox part textures with a single toggle. Everything becomes flat and clean — great for competitive play or just a different aesthetic.</div>
+      <div class="feat-badge"><i class="fa-solid fa-eraser"></i> 4-Flag Method</div>
+    </div>
+    <div class="feat-card reveal">
+      <div class="feat-icon">🔔</div>
+      <div class="feat-title">Cinematic Boot</div>
+      <div class="feat-desc">Bloxstrap-style loading screen with animated logo, step indicators, progress bar, floating particles, and loading tips. Because even your launcher should look good.</div>
+      <div class="feat-badge"><i class="fa-solid fa-star"></i> Cinematic</div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section id="story">
+  <div class="story-inner">
+    <div>
+      <div class="section-label reveal">Origin story</div>
+      <div class="story-quote reveal">
+        "We looked at <span class="hl">Bloxstrap</span> and thought — what if it looked actually <span class="hl">fire</span>?"
+      </div>
+      <div class="story-body reveal">
+        <p>
+          Bloxium started as a late-night side project. kpr.tekk had been using Bloxstrap — the legendary open-source bootstrapper by pizzaboxer — for months, loving everything it did under the hood. But he kept thinking: the UI could go harder.
+        </p>
+        <p>
+          So he opened a text editor, grabbed a reference to Bloxstrap's FastFlag implementation, and started building. The first version was rough — barely a loading screen and some toggles. But the core idea was there: a bootstrapper that felt like a real application, not a utility from 2008.
+        </p>
+        <p>
+          Six months of late nights, Discord feedback, and too much energy drink later — Bloxium v2.0 is here. Cinematic loading, 9 themes, synthesized keyboard sounds, proper texture removal, and a design that doesn't look like it came from a school project.
+        </p>
+        <p style="color: var(--accent2); font-weight: 600;">
+          Big love to pizzaboxer and the Bloxstrap community for making this whole thing possible. None of this happens without their groundwork. 🫶
+        </p>
+      </div>
+    </div>
+    <div class="story-timeline reveal">
+      <div class="tl-item">
+        <div class="tl-dot"><i class="fa-solid fa-seedling"></i></div>
+        <div class="tl-content">
+          <div class="tl-year">Day 1</div>
+          <div class="tl-title">The Idea</div>
+          <div class="tl-desc">Opened VSCode at 2am. "What if Bloxstrap had anime girl energy?" — kpr.tekk, probably.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"><i class="fa-solid fa-flag"></i></div>
+        <div class="tl-content">
+          <div class="tl-year">Week 2</div>
+          <div class="tl-title">FastFlags Working</div>
+          <div class="tl-desc">Got the JSON engine writing to ClientAppSettings.json. Textures disappeared. People freaked out.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"><i class="fa-solid fa-keyboard"></i></div>
+        <div class="tl-content">
+          <div class="tl-year">Month 2</div>
+          <div class="tl-title">Keyboard Sounds</div>
+          <div class="tl-desc">Spent a week getting WebAudio to sound like actual Cherry MX switches instead of a theremin.</div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot"><i class="fa-solid fa-rocket"></i></div>
+        <div class="tl-content">
+          <div class="tl-year">Now</div>
+          <div class="tl-title">v2.0.0 Release</div>
+          <div class="tl-desc">9 themes, 8 switches, cinematic boot, working FFlags. Ship it. 🚀</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download">
+  <div class="dl-orb-1"></div>
+  <div class="dl-orb-2"></div>
+  <div class="section-label reveal">Get started</div>
+  <h2 class="section-title reveal">Download Bloxium.</h2>
+  <p class="section-sub reveal" style="margin:0 auto;">Free. Always. No account needed. Just download and run — the installer walks you through everything.</p>
+
+  <div style="display:flex; justify-content:center;">
+    <div class="dl-card reveal">
+      <div class="dl-icon"><img src="oldroblox.png" style="width:40px;height:40px;object-fit:contain;" onerror="this.outerHTML='B'"></div>
+      <div>
+        <div class="dl-title">Bloxium v2.0.0</div>
+        <div class="dl-meta">Windows 10/11 · ~50MB · Released Feb 2026 · <span id="dl-count-2" style="color:var(--accent2);">...</span> downloads</div>
+      </div>
+      <div class="dl-specs">
+        <div class="dl-spec"><i class="fa-brands fa-windows"></i> Windows 10/11</div>
+        <div class="dl-spec"><i class="fa-solid fa-shield-halved"></i> Open Source</div>
+        <div class="dl-spec"><i class="fa-solid fa-bolt"></i> Electron App</div>
+        <div class="dl-spec"><i class="fa-solid fa-tag"></i> Free Forever</div>
+      </div>
+      <a href="https://github.com/lookocrim-png/d/releases/download/v2.0.0/BloxiumV3.zip" download class="btn-primary" id="dl-btn" style="font-size:16px;padding:16px 36px;" onclick="trackDownload()">
+        <i class="fa-solid fa-download"></i> Download for Windows
+      </a>
+      <p style="font-size:12px;color:var(--text3);font-family:var(--mono);">No virus. No bloat. Pinky promise.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CREDITS -->
+<section id="credits">
+  <div class="section-label reveal">The people</div>
+  <h2 class="section-title reveal">Credits</h2>
+  <p class="section-sub reveal">Made with love, energy drink, and an unhealthy amount of time on a keyboard.</p>
+
+  <div class="credits-grid">
+    <div class="credit-card reveal">
+      <div class="credit-avatar">K</div>
+      <div class="credit-name">kpr.tekk</div>
+      <div class="credit-role">aka M.vbxzz — Lead Developer & Designer</div>
+      <div class="credit-bio">Built the whole thing. Designed every pixel, wrote every line of JS, synthesized every key click. Powered by Monster Energy and Discord pings at 3am.</div>
+    </div>
+    <div class="credit-card reveal">
+      <div class="credit-avatar pink">D</div>
+      <div class="credit-name">Dripgeto24</div>
+      <div class="credit-role">OG Supporter</div>
+      <div class="credit-bio">The homie. Was there from day one sending feedback, breaking builds, and hyping the project. Bloxium wouldn't be the same without the support. Real ones know. ✊</div>
+    </div>
+    <div class="credit-card reveal">
+      <div class="credit-avatar teal">P</div>
+      <div class="credit-name">pizzaboxer</div>
+      <div class="credit-role">Bloxstrap — The OG</div>
+      <div class="credit-bio">Creator of Bloxstrap, the open-source bootstrapper that inspired Bloxium. The FastFlag system, the philosophy, the approach — all learned from his groundbreaking work.</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMUNITY -->
+<section id="community">
+  <div class="section-label reveal">Join us</div>
+  <h2 class="section-title reveal">We have a Discord.</h2>
+  <p class="section-sub reveal" style="margin:0 auto;">Get support, share setups, see previews, or just hang. The community is the whole point.</p>
+
+  <div style="display:flex;justify-content:center;">
+    <div class="discord-card reveal">
+      <i class="fa-brands fa-discord discord-icon"></i>
+      <div class="discord-info">
+        <h3>Bloxium Community</h3>
+        <p>Support channels, theme showcasing, keyboard sound discussion, FastFlag sharing, and general Roblox chaos.</p>
+        <a href="https://discord.gg/SGrhtuqbWp" class="btn-discord" target="_blank" style="cursor:pointer;">
+          <i class="fa-brands fa-discord"></i> Join the Server
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <div class="nav-logo-mark">B</div>
+    <span>Bloxium</span>
+  </div>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#story">Story</a>
+    <a href="https://github.com" target="_blank">GitHub</a>
+    <a href="https://discord.gg/SGrhtuqbWp" target="_blank">Discord</a>
+  </div>
+  <div class="footer-right">
+    v2.0.0 · Made by kpr.tekk<br>
+    <span style="color:var(--text4);">Not affiliated with Roblox Corporation</span>
+  </div>
+</footer>
+
+<script>
+/* ── CURSOR ── */
+const dot = document.getElementById('cur-dot');
+const ring = document.getElementById('cur-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+});
+function animCursor() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+}
+animCursor();
+document.querySelectorAll('a, button, .feat-card, .credit-card').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.width = '48px'; ring.style.height = '48px';
+    ring.style.borderColor = 'rgba(176,154,255,0.7)';
+    dot.style.transform = 'translate(-50%,-50%) scale(1.8)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.width = '32px'; ring.style.height = '32px';
+    ring.style.borderColor = 'rgba(176,154,255,0.4)';
+    dot.style.transform = 'translate(-50%,-50%) scale(1)';
+  });
+});
+
+/* ── REAL DOWNLOAD COUNTER ──
+   Uses countapi.xyz — free, no signup, persists forever.
+   GET  = read current value
+   HIT  = increment by 1 and return new value
+   You can view your counter anytime at:
+   https://api.countapi.xyz/info/bloxium-app/downloads
+   Change the namespace/key below if you want a different counter name.
+*/
+const COUNT_NS  = 'bloxium-app';   // your unique namespace
+const COUNT_KEY = 'downloads';     // key name
+
+function formatCount(n) {
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return n.toString();
+}
+
+function setCountDisplay(n) {
+  const formatted = formatCount(n);
+  const el1 = document.getElementById('dl-count');
+  const el2 = document.getElementById('dl-count-2');
+  if (el1) el1.textContent = formatted;
+  if (el2) el2.textContent = n.toLocaleString();
+}
+
+// On page load — just READ, don't increment (avoid inflating on every visit)
+async function fetchCount() {
+  try {
+    const r = await fetch(`https://api.countapi.xyz/get/${COUNT_NS}/${COUNT_KEY}`);
+    const d = await r.json();
+    if (d.value != null) setCountDisplay(d.value);
+    else setCountDisplay(0);
+  } catch {
+    // If API is down, show a dash
+    const el1 = document.getElementById('dl-count');
+    const el2 = document.getElementById('dl-count-2');
+    if (el1) el1.textContent = '—';
+    if (el2) el2.textContent = '—';
+  }
+}
+
+// Called when user clicks Download — increments the counter
+async function trackDownload() {
+  try {
+    const r = await fetch(`https://api.countapi.xyz/hit/${COUNT_NS}/${COUNT_KEY}`);
+    const d = await r.json();
+    if (d.value != null) setCountDisplay(d.value);
+  } catch { /* silent fail */ }
+}
+
+fetchCount();
+
+/* ── STARFIELD ── */
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+function initStars() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  stars = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 1.2 + 0.2,
+    a: Math.random() * 0.6 + 0.1,
+    speed: Math.random() * 0.15 + 0.02,
+    drift: (Math.random() - 0.5) * 0.1,
+  }));
+}
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.y += s.speed;
+    s.x += s.drift;
+    if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; }
+    if (s.x < 0 || s.x > canvas.width) s.x = Math.random() * canvas.width;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,190,255,${s.a})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+initStars();
+drawStars();
+window.addEventListener('resize', initStars);
+
+/* ── SCROLL REVEALS ── */
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 60);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+reveals.forEach(r => obs.observe(r));
+
+/* ── SMOOTH NAV SCROLL ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+
+/* ── BACKGROUND MUSIC ──────────────────────────────────────────────────
+   Uses free lofi streams from radio.garden / lofigirl CDN style links.
+   We use the Web Audio API to stream from a public lofi radio source.
+   Falls back gracefully if the stream cant load.
+   Tracks cycle through a curated playlist of royalty-free lofi tracks
+   hosted on freemusicarchive / pixabay public CDNs.
+─────────────────────────────────────────────────────────────────────── */
+
+const TRACKS = [
+  {
+    // Lofi hip hop – royalty free – Pixabay CDN
+    url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3',
+    title: 'Lofi Study',
+    artist: 'Pixabay Music'
+  },
+  {
+    url: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_5b2931f0c0.mp3?filename=lofi-chill-medium-version-159456.mp3',
+    title: 'Lofi Chill',
+    artist: 'Pixabay Music'
+  },
+  {
+    url: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946f0a8b9e.mp3?filename=lofi-hip-hop-beat-131377.mp3',
+    title: 'Lofi Hip Hop',
+    artist: 'Pixabay Music'
+  },
+  {
+    url: 'https://cdn.pixabay.com/download/audio/2023/02/28/audio_0e1a0f6b5f.mp3?filename=lofi-piano-hip-hop-116195.mp3',
+    title: 'Lofi Piano',
+    artist: 'Pixabay Music'
+  }
+];
+
+let trackIdx = 0;
+let audio = null;
+let musicPlaying = false;
+
+function buildAudio() {
+  if (audio) { audio.pause(); audio.src = ''; }
+  const t = TRACKS[trackIdx];
+  audio = new Audio();
+  audio.crossOrigin = 'anonymous';
+  audio.volume = parseInt(document.getElementById('mp-vol').value) / 100;
+  audio.src = t.url;
+  audio.loop = false;
+  document.getElementById('mp-title').textContent = t.title;
+  document.getElementById('mp-artist').textContent = t.artist;
+  // Auto-advance to next track
+  audio.addEventListener('ended', () => {
+    trackIdx = (trackIdx + 1) % TRACKS.length;
+    buildAudio();
+    if (musicPlaying) audio.play().catch(() => {});
+  });
+  // Handle load error — try next track
+  audio.addEventListener('error', () => {
+    console.log('Track failed, skipping...');
+    trackIdx = (trackIdx + 1) % TRACKS.length;
+    buildAudio();
+    if (musicPlaying) audio.play().catch(() => {});
+  });
+  document.getElementById('mp-artist').textContent = t.artist + ' — ' + (trackIdx + 1) + '/' + TRACKS.length;
+}
+
+function toggleMusic() {
+  if (!audio) buildAudio();
+  if (musicPlaying) {
+    audio.pause();
+    musicPlaying = false;
+    document.getElementById('mp-icon').className = 'fa-solid fa-play';
+    document.getElementById('mp-art').classList.remove('playing');
+    document.getElementById('mp-wave').classList.add('paused');
+    document.getElementById('mp-play').classList.remove('active');
+  } else {
+    audio.play().then(() => {
+      musicPlaying = true;
+      document.getElementById('mp-icon').className = 'fa-solid fa-pause';
+      document.getElementById('mp-art').classList.add('playing');
+      document.getElementById('mp-wave').classList.remove('paused');
+      document.getElementById('mp-play').classList.add('active');
+    }).catch(err => {
+      console.log('Audio blocked:', err);
+      // Browser autoplay policy — show tooltip
+      document.getElementById('mp-artist').textContent = 'Click play to start ♪';
+    });
+  }
+}
+
+function setMusicVol(v) {
+  if (audio) audio.volume = v / 100;
+}
+
+// Initialize audio object on first interaction (browsers block autoplay)
+document.addEventListener('click', () => {
+  if (!audio) buildAudio();
+}, { once: true });
+
+buildAudio();
+// Small hint animation after 2s to draw attention to the player
+setTimeout(() => {
+  const mp = document.getElementById('music-player');
+  mp.style.boxShadow = '0 8px 40px rgba(0,0,0,0.5), 0 0 30px rgba(124,92,255,0.4)';
+  setTimeout(() => { mp.style.boxShadow = ''; }, 1200);
+}, 2000);
+
+</script>
+
+<!-- MUSIC PLAYER -->
+<div id="music-player">
+  <div class="mp-art" id="mp-art">🎵</div>
+  <div style="display:flex;flex-direction:column;gap:2px;">
+    <div class="mp-title" id="mp-title">lofi beats</div>
+    <div class="mp-artist" id="mp-artist">bloxium radio · loading...</div>
+  </div>
+  <div class="mp-wave paused" id="mp-wave">
+    <span style="--d:.7s;--dd:0s"></span>
+    <span style="--d:.5s;--dd:.1s"></span>
+    <span style="--d:.8s;--dd:.2s"></span>
+    <span style="--d:.6s;--dd:.05s"></span>
+    <span style="--d:.9s;--dd:.15s"></span>
+  </div>
+  <div class="mp-controls">
+    <button class="mp-btn" id="mp-play" onclick="toggleMusic()" title="Play/Pause"><i class="fa-solid fa-play" id="mp-icon"></i></button>
+    <input type="range" class="mp-vol" id="mp-vol" min="0" max="100" value="18" oninput="setMusicVol(this.value)" title="Volume">
+  </div>
+</div>
+
+</body>
+</html>
